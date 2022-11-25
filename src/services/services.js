@@ -4,7 +4,6 @@ import * as bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
-//AUTH Services
 
 export const createUser = async ({ email, password, name, isAdm }) => {
   const userFound = users.find((elem) => elem.email === email);
@@ -37,6 +36,10 @@ export const createUser = async ({ email, password, name, isAdm }) => {
 
 export const loginUser = async ({ email, password }) => {
   const user = users.find((elem) => elem.email === email);
+  if (!user) {
+    return [404, { message: "Wrong email/password" }];
+  }
+
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
     return [401, { message: "Wrong email/password" }];
@@ -50,15 +53,17 @@ export const loginUser = async ({ email, password }) => {
   return [200, { token }];
 };
 
-//ADM Services
 
 export const listUsers = async () => {
   return [200, users];
 };
 
-export const deleteUser = async ({ index }) => {};
+export const deleteUser = async ({ index }) => {
+  users.splice(index, 1);
 
-//USER Services
+  return [204, {}];
+};
+
 
 export const listUser = async (index) => {
   let user = users[index];
@@ -74,17 +79,23 @@ export const listUser = async (index) => {
   return [200, userReturn];
 };
 
-export const updateUser = async (index, { email, password, name }) => {
-  users[index].email = email;
-  users[index].password = password;
-  users[index].name = name;
+export const updateUser = async (index, body) => {
+  for (const key in body) {
+    if (
+      key === "isAdm" ||
+      key === "uuid" ||
+      key === "createdOn" ||
+      key === "updatedOn"
+    ) {
+    } else {
+      users[index][key] = body[key];
+    }
+  }
+
   users[index].updatedOn = new Date();
 
   let user = users[index];
-  console.log(name);
-  console.log(user);
-
-  const { uuid, nameUser, emailUser, createdOn, updatedOn, isAdm } = user;
+  const { uuid, name, email, createdOn, updatedOn, isAdm } = user;
   const userReturn = {
     uuid,
     name,

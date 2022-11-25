@@ -53,14 +53,20 @@ export const verifyIsAdmin = async (req, res, next) => {
   if (!userIsAdm) {
     return res.status(403).json({ message: "Missing admin permissions." });
   }
-
-  req.user.isAdm = user.isAdm;
   return next();
 };
 
 export const verifyUserIsHimself = async (req, res, next) => {
-  console.log(req.params.id);
-  console.log(req.user.uuid);
+  const user = users.find((elem) => elem.uuid === req.user.uuid);
+  if (req.params.id === req.user.uuid) {
+    return next();
+  }
 
-  return next();
+  if (user.isAdm === true) {
+    return next();
+  }
+
+  return res.status(403).json({
+    message: "Missing admin permissions.",
+  });
 };

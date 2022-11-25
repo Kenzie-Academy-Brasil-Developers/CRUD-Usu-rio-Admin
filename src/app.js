@@ -5,13 +5,9 @@ import * as controllers from "./controllers/controllers";
 const app = express();
 app.use(express.json());
 
-// Auth requisitions;
-
 app.post("/users", controllers.createUserController);
 
 app.post("/login", controllers.loginUserController);
-
-// Admin requisitions;
 
 app.get(
   "/users",
@@ -23,11 +19,9 @@ app.get(
 app.delete(
   "/users/:id",
   middlewares.verifyAuth,
-  middlewares.verifyIsAdmin,
+  middlewares.verifyUserIsHimself,
   controllers.deleteUserController
 );
-
-// User logged requisitions;
 
 app.patch(
   "/users/:id",
@@ -41,7 +35,6 @@ app.get(
   "/users/profile",
   middlewares.verifyAuth,
   middlewares.verifyUserExists,
-  middlewares.verifyUserIsHimself,
   controllers.retrieveUserController
 );
 
